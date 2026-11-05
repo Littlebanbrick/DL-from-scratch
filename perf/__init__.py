@@ -4,6 +4,13 @@
 CPU 阶段同样可用：sync() 什么都不做。
 """
 
-from perf.bench import bench, device_info, peak_mem_mb, reset_peak_mem, sync
+from perf.bench import (
+    bench,
+    device_info,
+    peak_mem_mb,
+    reset_peak_mem,
+    set_threads,
+    sync,
+)
 
-__all__ = ["bench", "device_info", "peak_mem_mb", "reset_peak_mem", "sync"]
+__all__ = ["bench", "device_info", "peak_mem_mb", "reset_peak_mem", "set_threads", "sync"]

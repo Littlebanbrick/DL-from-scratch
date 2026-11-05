@@ -63,7 +63,21 @@ def reset_peak_mem() -> None:
 
 def device_info() -> str:
     """一行硬件描述，直接抄进 RESULTS.md。"""
+    thr = torch.get_num_threads()
     if torch.cuda.is_available():
         p = torch.cuda.get_device_properties(0)
-        return f"{p.name} {p.total_memory / 2**30:.1f}GB | torch {torch.__version__} | cuda {torch.version.cuda}"
-    return f"CPU | torch {torch.__version__}"
+        return f"{p.name} {p.total_memory / 2**30:.1f}GB | torch {torch.__version__} | cuda {torch.version.cuda} | cpu_threads {thr}"
+    return f"CPU | torch {torch.__version__} | cpu_threads {thr}"
+
+
+def set_threads(n: int = 8) -> int:
+    """限制 PyTorch 的 CPU 线程数，返回设置后的值。
+
+    为什么需要：默认值是 CPU 核数。在大小核混合的机器上把线程拉满会让调度
+    抖动，同一配置的中位数能在 1 ms 和 90 ms 之间跳。实测 Ultra 9 285H：
+    threads=8 稳定，threads=16 完全不可信。
+
+    跑任何性能实验之前先调一次，并把结果记进 RESULTS.md 的测量条件。
+    """
+    torch.set_num_threads(n)
+    return torch.get_num_threads()
