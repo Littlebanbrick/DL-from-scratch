@@ -1,5 +1,7 @@
 # Week 1 — PyTorch 上手 + FashionMLP
 
+> 本文件由 AI 生成，数字全部来自本机实测，来源见 `../RESULTS.md`。声明详见根目录 `README.md`。
+
 ## 结论速览
 
 | 问题 | 答案 |

@@ -1,5 +1,7 @@
 # DL From Scratch — ML × System
 
+> 本文件由 AI 生成。声明详见 `README.md`。
+
 浙大计算机 大二 · 目标：ML × System（高效推理 / 模型压缩）· 进组 → 美博 · 8 周 × 20h。有期末的周降级，宁拉长不中断。
 
 **已有**：HPC101 全套 —— W8A8 MoE 向量化（87.36×）、TileLang GDN prefill（H800）、INT8 张量核（3461 GFLOPS）、Gemma4-12B GPTQ（ΔNLL=0.1018）、鲲鹏算子 58–115×。**缺**：ML 侧。

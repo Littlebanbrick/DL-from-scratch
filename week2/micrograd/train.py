@@ -9,8 +9,10 @@
 """
 
 import argparse
+import gc
 import math
 import random
+import statistics
 import time
 
 import matplotlib
@@ -65,23 +67,35 @@ def accuracy(model, X, y):
 
 def train(model, X, y, lr=0.1, steps=200, log_every=20):
     hist = []
-    t0 = time.perf_counter()
+    step_ms = []
 
-    for step in range(steps):
-        loss = hinge_loss(model, X, y)
+    # 关掉 GC：`out._backward` 闭包捕获了 out 自己，图里有引用环，
+    # 只靠引用计数释放不掉，GC 会周期性停下来扫描 —— 中位数能被放大 10 倍。
+    gc.disable()
+    try:
+        t_start = time.perf_counter()
+        for step in range(steps):
+            t0 = time.perf_counter()
 
-        model.zero_grad()      # 必须在 backward 之前：梯度是累加的
-        loss.backward()
+            loss = hinge_loss(model, X, y)
 
-        for p in model.parameters():
-            p.data -= lr * p.grad   # 唯一的更新规则，一行
+            model.zero_grad()      # 必须在 backward 之前：梯度是累加的
+            loss.backward()
 
-        hist.append(loss.data)
-        if step % log_every == 0 or step == steps - 1:
-            acc = accuracy(model, X, y)
-            print(f"step {step:4d}  loss {loss.data:.4f}  acc {acc:.3f}")
+            for p in model.parameters():
+                p.data -= lr * p.grad   # 唯一的更新规则，一行
 
-    return hist, time.perf_counter() - t0
+            step_ms.append((time.perf_counter() - t0) * 1e3)
+
+            hist.append(loss.data)
+            if step % log_every == 0 or step == steps - 1:
+                acc = accuracy(model, X, y)     # 计时之外，不污染单步数字
+                print(f"step {step:4d}  loss {loss.data:.4f}  acc {acc:.3f}")
+        total = time.perf_counter() - t_start
+    finally:
+        gc.enable()
+
+    return hist, total, step_ms
 
 
 # ---------- 画图 ----------
@@ -136,8 +150,8 @@ if __name__ == "__main__":
     print(f"model: {model}")
     print(f"params: {len(model.parameters())}\n")
 
-    hist, elapsed = train(model, X, y, lr=args.lr, steps=args.steps)
+    hist, elapsed, step_ms = train(model, X, y, lr=args.lr, steps=args.steps)
     plot(model, hist, X, y, elapsed)
 
-    print(f"\ntotal train time   {elapsed:.2f} s")
-    print(f"per step           {elapsed / args.steps * 1e3:.1f} ms  ({args.n} samples)")
+    print(f"\ntotal train time   {elapsed:.2f} s   (gc disabled)")
+    print(f"per step median    {statistics.median(step_ms):.2f} ms   min {min(step_ms):.2f} ms   ({args.n} samples)")
