@@ -126,6 +126,16 @@ def train(model, train, dev, LR=0.1, MAXSTEPS=100000, PATIENCE=3, EVALEVERY=100)
 
 
 if __name__ == "__main__":
+    import argparse
+
+    p = argparse.ArgumentParser()
+    p.add_argument("--lr", type=float, default=0.01)
+    p.add_argument("--max-steps", type=int, default=100000)
+    p.add_argument("--patience", type=int, default=20)
+    p.add_argument("--eval-every", type=int, default=100)
+    p.add_argument("--ckpt", type=str, default="split.pt")
+    args = p.parse_args()
+
     torch.manual_seed(SEED)
     train_set, dev, test = get_splits()
     no_overlap(train_set, dev, test)
@@ -133,9 +143,9 @@ if __name__ == "__main__":
     model = M.MLP()
 
     BASELINE = baseline(train_set, dev, smooth=1.0)
-    MAXSTEPS = 100000
-    EVALEVERY = 100
-    PATIENCE = 20
+    MAXSTEPS = args.max_steps
+    EVALEVERY = args.eval_every
+    PATIENCE = args.patience
 
     def to_tensors(names, block=3):
         xs, ys = [], []
@@ -160,7 +170,7 @@ if __name__ == "__main__":
     assert MAXSTEPS > EVALEVERY, f"MAXSTEPS {MAXSTEPS} should be greater than EVALEVERY {EVALEVERY}"
     best_state, best_dev = train(
         model, (Xtr, Ytr), (Xdev, Ydev),
-        MAXSTEPS=MAXSTEPS, PATIENCE=PATIENCE, EVALEVERY=EVALEVERY,
+        LR=args.lr, MAXSTEPS=MAXSTEPS, PATIENCE=PATIENCE, EVALEVERY=EVALEVERY,
     )
 
     # 回到最佳状态
@@ -186,7 +196,7 @@ if __name__ == "__main__":
             "stoi": stoi,
             "nll": test_nll,
         },
-        "split.pt",
+        args.ckpt,
     )
-    print("saved split.pt")
+    print(f"saved {args.ckpt}")
 
