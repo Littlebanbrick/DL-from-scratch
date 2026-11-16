@@ -16,7 +16,11 @@ class MultiHeadAttention(nn.Module):
         self.heads = nn.ModuleList([Head(n_embd, block_size, head_size) for _ in range(n_head)])
         self.proj = nn.Linear(head_size * n_head, n_embd)
 
-    def forward(self, x):
-        out = torch.cat([head(x) for head in self.heads], dim=-1)
-        return self.proj(out)
+    def forward(self, x, kv_cache=None):
+        outs, new_caches = [], []
+        for i, h in enumerate(self.heads):
+            o, c = h(x, None if kv_cache is None else kv_cache[i])
+            outs.append(o)
+            new_caches.append(c)
+        return self.proj(torch.cat(outs, dim=-1)), new_caches
 

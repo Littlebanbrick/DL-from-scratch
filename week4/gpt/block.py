@@ -29,8 +29,9 @@ class Block(nn.Module):
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
 
-    def forward(self, x):
+    def forward(self, x, kv_cache=None):
         ''' pre-norm: 先归一化再进子层, 残差那条路完全干净, 梯度可以直通 '''
-        x = x + self.sa(self.ln1(x))        # 1. attention 跨位置交流
+        sa_out, new_cache = self.sa(self.ln1(x), kv_cache)
+        x = x + sa_out                      # 1. attention 跨位置交流
         x = x + self.ffwd(self.ln2(x))      # 2. FFN 单位置加工
-        return x
+        return x, new_cache
