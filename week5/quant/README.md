@@ -62,22 +62,6 @@ python exp_outlier.py      # 实验 3
 
 **「per-group 一定更好」这个直觉在小张量上不成立。**
 
-## 踩到的三个坑
-
-**1. 注入多个离群值会让参照点失效**
-
-第一版给 8 个 FFN 张量各注入一个 ×10 离群值，结果是 `fp32 本身`就从 1.5946 崩到 3.3267（+1.73）。扰动盖过了量化误差，无法归因。
-
-**改成只注入 1 个张量**，扰动降到 +0.0014，对比才有意义。
-
-**2. `tril` 掩码被误当成权重**
-
-第一次跑 `weight_stats.py`，attention 组的峰度是 7.04（异常）。原因是 `blocks.*.sa.heads.*.tril` 是 float 类型的 buffer（值只有 0/1），被 `group_of` 归进了 attention 组。排除后峰度 3.04，正常。
-
-**3. `inspect.py` 与标准库重名**
-
-`matplotlib` 内部会 `import inspect`，同目录下的 `inspect.py` 抢先被导入，触发循环导入报错。改名 `weight_stats.py`。
-
 ## 已知局限
 
 1. **只测精度，不测速度。** `quantize_dequantize` 返回 fp32，计算仍走 fp32。CPU 没有整数矩阵乘指令，真加速必须上 GPU。

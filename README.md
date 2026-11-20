@@ -2,7 +2,7 @@
 
 从零手写神经网络到 GPT，再接到推理优化：手写 autograd、GPT、KV cache、量化、Triton kernel。
 
-浙大计算机本科阶段自学计划，8 周 × 20h。计划与自测见 [DL-from-scratch.md](DL-from-scratch.md)。
+计划与自测见 [DL-from-scratch.md](DL-from-scratch.md)。
 
 所有实测数字的唯一出处：[RESULTS.md](RESULTS.md)。测量一律走 [perf/bench.py](perf/bench.py)。
 
@@ -30,7 +30,7 @@
 - `week1-mlp/README.md`
 - `week2/micrograd/README.md`
 - `week3/makemore/README.md`
-- `week5/quant/README.md` —— **本周内容整体由 AI 生成**。量化与本人 HPC101 Lab2/Lab5 重叠，故刻意缩小范围只做最小闭环，详见该文件开头
+- `week5/quant/README.md`
 - `DL-from-scratch.md`（学习计划）
 
 ## 环境
