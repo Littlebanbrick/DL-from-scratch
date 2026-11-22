@@ -2,33 +2,29 @@
 
 > 本文件由 AI 生成。声明详见 `README.md`。
 
-浙大计算机 大二 · 目标：ML × System（高效推理 / 模型压缩）· 进组 → 美博 · 8 周 × 20h。有期末的周降级，宁拉长不中断。
-
 **已有**：HPC101 全套 —— W8A8 MoE 向量化（87.36×）、TileLang GDN prefill（H800）、INT8 张量核（3461 GFLOPS）、Gemma4-12B GPTQ（ΔNLL=0.1018）、鲲鹏算子 58–115×。**缺**：ML 侧。
 **目标**：从零写并训练 GPT → 加 KV cache → 量化到 4bit → 写 Triton kernel → 回答一个自己提的测量问题。
 
 ## 0. 方向
 
-**默认主向：高效推理 + 模型压缩。** AI for Systems 前置 1–2 年（编译 / OS / DB），会场是 OSDI / SOSP / ATC，与主向的 MLSys / ICLR / NeurIPS / ASPLOS 不是同一批导师。
+**默认主向：高效推理 + 模型压缩。** AI for Systems 前置 1–2 年（编译 / OS / DB），会场是 OSDI / SOSP / ATC。
 
-**现在不读论文定方向。** 看不懂的论文读三遍也不产生判断。三篇的位置本来就排好了：FlashAttention 在 Week 6、GPTQ 在 Week 5、Ansor 在「只读不做」。等认识 attention、跑过量化，再回头确认。
+**现在不读论文定方向。**
 
-**复核点：Week 4 结束、Week 6 结束，各花 1 小时**，把结论写进 `notes/00-direction.md`。中间不重开这个问题。
+**复核点：Week 4 结束、Week 6 结束，各花 1 小时**，把结论写进 `notes/00-direction.md`。
 
 ## 1. 开工前（约 1 小时）
 
-Week 1–3 纯 CPU。**买卡不急，但 Week 3 结束前必须定下来** —— Week 4 第一件事就是训练 GPT。
+Week 1–3 纯 CPU。
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install torch --index-url https://download.pytorch.org/whl/cpu   # 前 3 周 CPU 版
+pip install torch --index-url https://download.pytorch.org/whl/cpu   # CPU 版
 pip install numpy matplotlib
 pip freeze > requirements.txt
 git init && printf '.venv/\n__pycache__/\n*.pt\n*.pth\ndata/\n.ipynb_checkpoints/\n*.log\n' > .gitignore
 python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 ```
-
-前 3 周输出 `False` 正常。triton 到 Week 6 再装，CPU 阶段没用。
 
 **Week 3 结束前问清六件事**，写进 `notes/hardware.md`，每份报告引用：
 
@@ -150,20 +146,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 数字：                  ← 指向 RESULTS.md 对应行
 ```
 
-## 5. 邮件与 GitHub
-
-**Week 3 发第一封。** HPC101 仓库已够撑冷邮件；等八周的风险是名额被占、方向被改、白学三周。
-
-第一封：我是谁（浙大计算机大二）+ 一句话现状（HPC101 + H800 TileLang kernel + Gemma-12B GPTQ 端到端）→ 读了你某篇工作的某一节，具体到一个问题，不泛夸 → 接下来六周做什么，产出公开在仓库 → 一个廉价请求（旁听组会 / 每周几小时的本科任务）→ 附两个**具体文件**直链，不只给首页，结尾不要求回复。
-第二封（Week 8）：三点量化曲线 + 交叉点结论 + 「下一个想做的问题是 X」。
-
-GitHub：pin `hpc101`、`hpc101-final-project`、`dl-from-scratch`（现在首页第一眼是 rEFInd 引导主题）。`hpc101` 根目录的 `_new_moe_opt.cpp`、`_probe_s4_src.cpp`、`_row4_baseline_revert.cpp`、`_rv5_full.sh`、`ab_t2d_novt_rerun.sh`、`_splice.py` 移进 `archive/`，每 Lab 顶层只留 `README.md` + `final/`。bio 加方向。`CLAUDE.md` 与 `memory/` 保留，但每个数字都要能白板讲解。
-
-## 6. 不碰
-
-强化学习、扩散模型、RAG、Agent 框架；分布式训练 / ZeRO / FSDP（Week 8 后）；CUDA C++ 手写 kernel（Triton 优先，非主线）；2026 新论文（Week 8 后）；同时看两个教程；全量读 PyTorch 源码（但 Week 4 后读一两个 ATen CUDA kernel 是推荐的）。
-
-## 7. 论文（按序，每篇一节 notes）
+## 5. 论文（按序，每篇一节 notes）
 
 1. Attention Is All You Need — 起点
 2. FlashAttention / FlashAttention-2 — Week 6 核心
@@ -176,12 +159,12 @@ GitHub：pin `hpc101`、`hpc101-final-project`、`dl-from-scratch`（现在首�
 
 只读不做（每周 ≤1h）：TVM、Ansor、The Case for Learned Index Structures。
 
-## 8. 资源
+## 6. 资源
 
 主线课程 https://karpathy.ai/zero-to-hero.html · micrograd https://github.com/karpathy/micrograd · nanoGPT https://github.com/karpathy/nanoGPT · 中文教材 https://zh.d2l.ai/ · Triton 教程 https://triton-lang.org/main/getting-started/tutorials/ · ML × 系统桥接 https://github.com/stanford-cs336/assignment2-systems · 高效 AI 计算（Song Han）https://hanlab.mit.edu/courses/2026-fall-65940 · Transformer 可视化 https://jalammar.github.io/illustrated-transformer/
 
 Karpathy 视频是英文，开字幕跟；B 站有中文字幕搬运版。
 
-## 9. Week 8 之后
+## 7. Week 8 之后
 
 分布式训练（CS336 assignment 2 的 parallelism 部分）；读 2026 新论文更新 `notes/`；若 Week 7 结论有意思，做到能投 MLSys 或 workshop 的程度。
